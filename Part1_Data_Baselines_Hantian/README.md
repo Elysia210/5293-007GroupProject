@@ -1,7 +1,5 @@
 <<<<<<< HEAD
 
-=======
-﻿# Part 1: Data and Baselines (Hantian)
 This section contains baseline implementations and data processing.
 
 # EG-GenRM — Step 1 Data Preparation Pipeline
