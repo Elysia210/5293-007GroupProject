@@ -352,15 +352,6 @@ In the uploaded file:
 
 A strict filtering setting would keep the 663 label-consistent examples. A more permissive setting may keep disagreement examples for manual inspection, because some original automatic labels may be noisy.
 
-Recommended output files:
-
-```text
-data/interim/teacher_outputs_all_candidates.jsonl
-data/processed/clean_teacher_data.jsonl
-data/examples/clean_teacher_sample.jsonl
-```
-
----
 
 ## 5. Stage 3: Public Data Selection
 
@@ -370,14 +361,14 @@ Teacher-generated data is high quality but expensive and limited in size. Public
 
 Therefore, we prepare public-source data as a larger candidate pool that can later be completed by the PPM.
 
-Potential public sources include:
+public sources include:
 
 ```text
 GSM8K
 MATH / MATH500
 OpenMathInstruct-1 remaining examples
 GenRM-style public verification examples
-Math-Shepherd / PRM-style process data if used
+[Math-Shepherd / PRM-style process data if used](https://github.com/genrm-star/genrm-critiques)
 ```
 
 ---
@@ -461,15 +452,7 @@ Example PPM SFT format:
 }
 ```
 
-Recommended output files:
 
-```text
-data/processed/ppm_sft_train.jsonl
-data/processed/ppm_sft_valid.jsonl
-data/examples/ppm_sft_sample.jsonl
-```
-
----
 
 ### 6.2 Use PPM to Complete Public Data
 
@@ -508,13 +491,7 @@ Example:
 }
 ```
 
-Recommended output file:
 
-```text
-data/processed/ppm_generated_rationales.jsonl
-```
-
----
 
 ## 7. Stage 5: Final Data Fusion
 
@@ -559,25 +536,9 @@ Final training example:
 }
 ```
 
-Recommended output files:
 
-```text
-data/processed/final_verifier_sft_train.jsonl
-data/processed/final_verifier_sft_valid.jsonl
-data/examples/final_train_sample.jsonl
-```
 
-This final dataset is the common input for later verifier training experiments, including:
 
-```text
-Vanilla GenRM SFT
-Entropy-weighted GenRM SFT
-Top-k high-entropy loss
-Verdict-aware entropy loss
-EG-GenRM variants
-```
-
----
 
 ## 8. End-to-End Example
 
@@ -731,81 +692,14 @@ This allows the final verifier to learn not only the answer label, but also the 
 
 ---
 
-## 9. Repository File Organization
 
-Recommended repository structure for the data pipeline:
 
-```text
-project-root/
-|
-├── DATA.md
-├── README.md
-├── requirements.txt
-├── environment.yml
-├── .env.example
-├── .gitignore
-|
-├── configs/
-│   └── data_config.yaml
-|
-├── prompts/
-│   ├── teacher_verifier_prompt.txt
-│   └── ppm_generation_prompt.txt
-|
-├── data/
-│   ├── raw/
-│   ├── interim/
-│   ├── processed/
-│   └── examples/
-│       ├── teacher_seed_sample.jsonl
-│       ├── teacher_output_sample.jsonl
-│       ├── clean_teacher_sample.jsonl
-│       ├── public_candidate_sample.jsonl
-│       ├── ppm_sft_sample.jsonl
-│       ├── ppm_generated_sample.jsonl
-│       └── final_train_sample.jsonl
-|
-├── notebooks/
-│   └── teacherdata_clean.ipynb
-|
-└── scripts/
-    └── data/
-        ├── 00_download_public_data.py
-        ├── 01_build_candidate_pool.py
-        ├── 02_select_teacher_seed.py
-        ├── 03_generate_teacher_rationales.py
-        ├── 04_filter_teacher_outputs.py
-        ├── 05_build_ppm_sft_dataset.py
-        ├── 06_prepare_public_sources.py
-        ├── 07_generate_ppm_rationales.py
-        ├── 08_merge_final_dataset.py
-        └── 09_quality_check_final_dataset.py
-```
 
----
 
-## 10. Script Mapping
-
-| Script | Purpose | Main output |
-|---|---|---|
-| `00_download_public_data.py` | Download or load public math datasets | `data/raw/` |
-| `01_build_candidate_pool.py` | Normalize raw data into candidate-solution records | `candidate_pool.jsonl` |
-| `02_select_teacher_seed.py` | Select balanced teacher seed packs | `teacher_seed_full.jsonl` |
-| `03_generate_teacher_rationales.py` | Call teacher API and save raw rationales | `teacher_outputs_all_candidates.jsonl` |
-| `04_filter_teacher_outputs.py` | Filter teacher outputs by format and label consistency | `clean_teacher_data.jsonl` |
-| `05_build_ppm_sft_dataset.py` | Convert clean teacher data into PPM SFT format | `ppm_sft_train.jsonl` |
-| `06_prepare_public_sources.py` | Normalize additional public data | `public_candidate_pool.jsonl` |
-| `07_generate_ppm_rationales.py` | Use trained PPM to generate rationales for public data | `ppm_generated_rationales.jsonl` |
-| `08_merge_final_dataset.py` | Merge teacher, PPM-generated, and public data | `final_verifier_sft_train.jsonl` |
-| `09_quality_check_final_dataset.py` | Check format, label balance, duplicates, and examples | quality report |
-
----
-
-## 11. Quality Control
+## 9. Quality Control
 
 The final dataset should be checked before training.
 
-Recommended checks:
 
 ```text
 1. Every example has a non-empty question.
@@ -819,7 +713,7 @@ Recommended checks:
 9. A small sample is manually inspected.
 ```
 
-Suggested final quality report fields:
+ final quality report fields:
 
 ```text
 total examples
@@ -837,59 +731,7 @@ number of duplicate examples
 
 ---
 
-## 12. What Is Committed to GitHub
-
-Full raw and processed datasets should not be committed to GitHub because they may be large.
-
-Commit:
-
-```text
-DATA.md
-README.md
-configs/
-prompts/
-scripts/data/
-data/examples/*.jsonl
-notebooks/teacherdata_clean.ipynb if cleaned
-```
-
-Do not commit:
-
-```text
-.env
-raw full datasets
-large processed JSONL files
-teacher API checkpoints
-model checkpoints
-API keys
-```
-
-The `.gitignore` should include:
-
-```gitignore
-.env
-__pycache__/
-*.pyc
-
-data/raw/*
-data/interim/*
-data/processed/*
-
-!data/raw/.gitkeep
-!data/interim/.gitkeep
-!data/processed/.gitkeep
-!data/examples/
-!data/examples/*.jsonl
-
-outputs/
-checkpoints/
-wandb/
-runs/
-```
-
----
-
-## 13. Current Status
+# Current Status
 
 The current uploaded teacher-generation file contains direct teacher-generated verification rationales for candidate solutions from NVIDIA/OpenMathInstruct-style data.
 
@@ -906,17 +748,4 @@ Parsed Yes/No verdicts: 724
 Strict label-consistent examples: 663
 ```
 
-This file is the raw teacher-generated supervision source. The next required steps are:
-
-```text
-1. remove API keys from the notebook;
-2. convert the notebook into clean data scripts;
-3. filter raw teacher outputs into clean_teacher_data.jsonl;
-4. convert clean teacher data into ppm_sft_train.jsonl;
-5. prepare public candidate data;
-6. train PPM;
-7. use PPM to generate teacher-like rationales for public data;
-8. merge all sources into final_verifier_sft_train.jsonl;
-9. run final quality checks.
-```
 
