@@ -1,6 +1,6 @@
 # EG-GenRM: Entropy-Guided Generative Reward Model
 
-STAT GR5293 (Sec 007), Spring 2026 final project at Columbia. Team: Hantian Zhang (`hz3101`), Menglei Zhang (`mz3129`), Ruimin Zhang (`rz2737`).
+Team: Hantian Zhang (`hz3101`), Menglei Zhang (`mz3129`), Ruimin Zhang (`rz2737`).
 
 The project is about reasoning hallucinations in math problem solving. We train a small LM as a generative verifier (it writes Yes or No on candidate solutions), tweak the loss so it only updates on the most uncertain tokens, and use the verifier to filter candidates before majority voting. Code is split across three stages, one per teammate, each documented in its own section below.
 
