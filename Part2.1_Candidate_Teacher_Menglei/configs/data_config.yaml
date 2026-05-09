@@ -1,1 +1,158 @@
+# Data processing configuration for EG-GenRM
+# This file controls the teacher-data, public-data, PPM-rationale, and final-fusion pipeline.
 
+project:
+  name: eg-genrm-data
+  random_seed: 42
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  examples_dir: data/examples
+
+raw_datasets:
+  # Primary public source used in the current teacher-data notebook.
+  openmathinstruct:
+    hf_name: nvidia/OpenMathInstruct-1
+    enabled: true
+    split: train
+    fields:
+      question: question
+      candidate_solution: generated_solution
+      expected_answer: expected_answer
+      predicted_answer: predicted_answer
+      is_correct: is_correct
+  gsm8k:
+    hf_name: gsm8k
+    enabled: true
+    config_name: main
+    train_split: train
+    test_split: test
+  math:
+    hf_name: hendrycks/competition_math
+    enabled: false
+    split: train
+
+candidate_pool:
+  output_file: data/interim/candidate_pool.jsonl
+  min_solution_chars: 20
+  max_solution_chars: 4096
+  remove_empty_solutions: true
+  remove_duplicate_solutions_per_question: true
+  keep_code_solutions: true
+
+teacher_seed:
+  # A pack is one normalized question with multiple candidate solutions.
+  output_wide_file: data/interim/final_balanced_packs_wide.csv
+  output_long_file: data/interim/final_balanced_packs_long.csv
+  output_sample_file: data/examples/teacher_seed_sample.jsonl
+  num_question_packs: 200
+  candidates_per_pack:
+    - correct_1
+    - correct_2
+    - subtle_wrong
+    - random_wrong
+  require_at_least_correct: 2
+  require_at_least_wrong: 2
+  subtle_wrong:
+    enabled: true
+    # Prefer wrong solutions that are textually similar to correct ones,
+    # because they are harder for a verifier and more valuable for training.
+    similarity_metric: rapidfuzz_token_set_ratio
+    min_similarity_to_correct: 60
+    max_similarity_to_correct: 98
+  random_seed: 42
+
+teacher_generation:
+  prompt_file: prompts/teacher_verifier_prompt.txt
+  output_raw_file: data/interim/teacher_outputs_all_candidates.jsonl
+  output_error_file: data/interim/teacher_outputs_all_candidates_errors.jsonl
+  checkpoint_file: data/interim/teacher_outputs_all_candidates_checkpoint.json
+  api:
+    provider: nvidia-openai-compatible
+    api_key_env: NVIDIA_API_KEY
+    api_base_env: NVIDIA_API_BASE
+    default_api_base: https://integrate.api.nvidia.com/v1
+    model_env: TEACHER_MODEL
+    default_model: moonshotai/kimi-k2.5
+  generation:
+    temperature: 0.2
+    max_tokens: 1200
+    top_p: 0.95
+  rate_limit:
+    requests_per_minute: 40
+    max_retries: 3
+    retry_sleep_seconds: 8
+
+teacher_filtering:
+  input_file: data/interim/teacher_outputs_all_candidates.jsonl
+  output_file: data/processed/clean_teacher_data.jsonl
+  output_sample_file: data/examples/clean_teacher_sample.jsonl
+  require_status_ok: true
+  require_final_verdict: true
+  require_label_match: true
+  min_rationale_chars: 80
+  require_earliest_error_for_wrong: false
+  final_verdict_regex: "Verification:\s*Is the answer correct \(Yes/No\)\?\s*(Yes|No)"
+
+ppm_sft:
+  input_file: data/processed/clean_teacher_data.jsonl
+  train_file: data/processed/ppm_sft_train.jsonl
+  valid_file: data/processed/ppm_sft_valid.jsonl
+  sample_file: data/examples/ppm_sft_sample.jsonl
+  valid_ratio: 0.10
+  user_template: |
+    Question:
+{question}
+
+Candidate Solution:
+{candidate_solution}
+
+Please verify the candidate solution step by step and end with:
+Verification: Is the answer correct (Yes/No)? X
+
+public_sources:
+  output_file: data/interim/public_candidate_pool.jsonl
+  output_sample_file: data/examples/public_candidate_sample.jsonl
+  sources:
+    - openmathinstruct_remaining
+    - gsm8k
+    - math
+  max_examples_per_source: 50000
+  balance_correct_wrong: true
+
+ppm_generation:
+  prompt_file: prompts/ppm_generation_prompt.txt
+  input_file: data/interim/public_candidate_pool.jsonl
+  output_file: data/interim/ppm_generated_rationales.jsonl
+  output_sample_file: data/examples/ppm_generated_sample.jsonl
+  model_path: checkpoints/ppm_lora
+  max_new_tokens: 768
+  temperature: 0.2
+  batch_size: 4
+
+final_fusion:
+  teacher_file: data/processed/clean_teacher_data.jsonl
+  ppm_generated_file: data/interim/ppm_generated_rationales.jsonl
+  public_label_only_file: data/interim/public_candidate_pool.jsonl
+  train_file: data/processed/final_verifier_sft_train.jsonl
+  valid_file: data/processed/final_verifier_sft_valid.jsonl
+  sample_file: data/examples/final_train_sample.jsonl
+  valid_ratio: 0.10
+  mixture:
+    teacher_generated: 1.0
+    ppm_generated: 1.0
+    public_label_only: 0.25
+  balance_yes_no: true
+  remove_duplicates_by:
+    - question_norm
+    - candidate_solution_clean
+
+quality_check:
+  report_file: data/processed/final_data_quality_report.json
+  check_required_fields: true
+  check_final_verdict_format: true
+  check_empty_text: true
+  check_yes_no_balance: true
+  check_source_mixture: true
