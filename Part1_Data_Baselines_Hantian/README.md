@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-
-# EG-GenRM — Part1 Baseline Implementations and Data Processing
+# Part1 Baseline Implementations and Data Processing
 
 This repository implements the first stage of the EG-GenRM project: generating structured multi-path reasoning data for GSM8K and MATH-500.
 
