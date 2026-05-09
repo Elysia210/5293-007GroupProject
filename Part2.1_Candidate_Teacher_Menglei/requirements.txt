@@ -1,0 +1,18 @@
+# Core data processing
+numpy>=1.24
+pandas>=2.0
+datasets>=2.18
+rapidfuzz>=3.0
+
+# Teacher API / OpenAI-compatible API client
+openai>=1.30
+python-dotenv>=1.0
+
+# Configs and utilities
+PyYAML>=6.0
+tqdm>=4.66
+jsonlines>=4.0
+
+# Optional: notebook support for reproducing teacherdata_clean.ipynb
+ipykernel>=6.0
+jupyter>=1.0
