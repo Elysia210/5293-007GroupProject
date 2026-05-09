@@ -21,7 +21,7 @@ This stage prepares the GSM8K and MATH500 baseline outputs that the downstream e
 
 ---
 
-## Stage 2: Candidate Generation and Teacher Annotation
+## Stage 2: Train data Generation and training
 **Owner:** Menglei Zhang.
 
 * **Part 2.1:** Introduces a novel, low-cost method to generate high-quality data for training the generative mathematical reasoning verifier.
