@@ -1,0 +1,5 @@
+question_norm,candidate_role,true_label,pred_label,generated_text
+"stephen made 10 round trips up and down a 40,000 foot tall mountain. if he reached 3/4 of the mountain's height on each of his trips, calculate the total distance he covered.",correct_2,Yes,No,<final_verdict>No</final_verdict>
+what is the sum of the greatest common factor of 3 and 6 and the least common multiple of 3 and 6?,correct_1,Yes,No,<final_verdict>No</final_verdict>
+"cheryl is signing up for a golf tournament that costs 20% more than her monthly cell phone expenses to enter the tournament. if cheryl spends $400 more on her monthly cell phone expenses than on the electricity bill, which costs $800, calculate the total amount she pays upon signing up for the golf tournament.",correct_2,Yes,No,<final_verdict>No</final_verdict>
+jason has a carriage house that he rents out. he’s charging $50.00 per day or $500.00 for 14 days. eric wants to rent the house for 20 days. how much will it cost him?,correct_2,Yes,No,<final_verdict>No</final_verdict>

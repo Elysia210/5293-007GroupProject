@@ -1,0 +1,9 @@
+Method,Accuracy,Verifier calls,Category
+Random candidate,50.0%,0,Baseline
+Majority Voting,93.5%,0,Baseline
+Teacher GenRM (naive),89.2%,744,Verifier
+Teacher-filtered Majority ★,98.4%,744,Verifier+Vote
+EG-GenRM (real entropy),TBD,744,EG-GenRM
+EG-GenRM (top-2 entropy),TBD,372,EG-GenRM (efficient)
+Fine-tuned GenRM,TBD,744,Fine-tuned
+Best-of-N Oracle,100.0%,GT required,Upper bound

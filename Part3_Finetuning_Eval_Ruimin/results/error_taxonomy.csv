@@ -1,0 +1,9 @@
+error_type,count
+Generalization / variable error,123
+Incorrect conclusion,75
+Other,59
+Arithmetic error,42
+No error,39
+Reasoning / logic error,30
+Problem misinterpretation,7
+Wrong formula,1

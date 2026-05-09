@@ -1,0 +1,10 @@
+Method,Accuracy,V-calls,Scope,Category,Note
+Random candidate,50.0%,0,186 q,Baseline,avg 500 trials
+Majority Voting,93.5%,0,186 q,Baseline,vote over candidate answers
+Teacher GenRM (naive),89.2%,744,186 q,Teacher,random pick from Kimi-K2.5 Yes pool
+Teacher-filtered Majority ★,98.4%,744,186 q,Teacher,majority vote within teacher-accepted pool
+A: Std QLoRA (cand. acc.),64.3%,111,test cands,Method A,P=61.0% R=83.9% F1=0.707
+A: Std QLoRA — filt. majority,88.9%,108,27 q test,Method A,per-question selection; majority in yes-pool
+B: EG-GenRM (cand. acc.),70.5%,111,test cands,Method B,P=65.0% R=92.9% F1=0.765
+B: EG-GenRM — conflict-guarded majority,92.6%,108,27 q test,Method B,EG-GenRM verifier + consensus/conflict guard; rule=B conflict guard
+Best-of-N Oracle,100.0%,GT req,186 q,Upper bound,oracle upper bound

@@ -1,0 +1,8 @@
+Method,Accuracy,Note
+Random,50.2%,baseline
+Majority Voting,97.4%,no verifier
+Teacher GenRM (naive),92.1%,Kimi-K2.5
+Teacher-filtered Majority,100.0%,Kimi-K2.5 
+Method A filt. majority,97.4%,Std QLoRA
+Method B EG-GenRM guarded majority,89.5%,EG-GenRM 
+Oracle,100.0%,upper bound

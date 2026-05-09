@@ -1,0 +1,12 @@
+﻿datasets
+peft
+scikit-learn
+seaborn
+matplotlib
+numpy
+pandas
+tqdm
+transformers
+torch
+bitsandbytes
+google-colab

@@ -82,8 +82,8 @@ Inputs needed under the project root:
 
 ```
 <PROJECT_ROOT>/
-├── teacher_outputs_all_candidates (38).jsonl    (from Stage 2)
-└── baseline/                                    (from Stage 1)
+├── teacher_outputs_all_candidates (38).jsonl    (from Stage 2 - INCLUDED IN REPO)
+└── baseline/                                    (from Stage 1 - INCLUDED IN REPO)
     ├── gsm8k_k5_run/
     │   └── direct_live.jsonl
     └── math500_k5_run/
@@ -91,6 +91,8 @@ Inputs needed under the project root:
         ├── candidate_paths.jsonl
         └── cleaned_samples.jsonl
 ```
+
+**Note:** Large model checkpoint files (*.pt, *.pth, *.safetensors, *.bin) and the `outputs/` directory are not included in this repository due to GitHub file size limits. The notebook will download the base model automatically and generate the outputs during runtime.
 
 Each record in the teacher JSONL has at minimum these fields: `question_norm`, `candidate_role`, `candidate_solution_clean` (or `_raw`), `candidate_predicted_answer`, `expected_answer`, `candidate_is_correct`, `parsed_final_verdict` (Yes / No / None), `teacher_model`, `earliest_error`, `run_id`.
 

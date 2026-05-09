@@ -1,0 +1,6 @@
+method,accuracy,scope
+Direct — GSM8K,0.978,GSM8K 1000
+Direct — MATH500,0.816,MATH500 500
+CoT pass@1 — MATH500,0.638,MATH500 500q k5
+Majority Voting — MATH500,0.664,MATH500 500q k5
+Best-of-N Oracle — MATH500,0.732,MATH500 500q k5

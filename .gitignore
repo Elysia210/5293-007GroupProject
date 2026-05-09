@@ -1,0 +1,14 @@
+﻿# Large model checkpoints and outputs
+Part3_Finetuning_Eval_Ruimin/outputs/
+*.pt
+*.pth
+*.safetensors
+*.bin
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.egg-info/
+dist/
+build/

@@ -1,0 +1,4 @@
+method,accuracy,ci_low,ci_high,p_improvement_le_0
+Method A,88.9%,77.8%,100.0%,-
+Method B,88.9%,74.1%,100.0%,-
+B - A improvement,0.0%,-11.1%,11.1%,0.656

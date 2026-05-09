@@ -1,0 +1,4 @@
+method,accuracy,ci_low,ci_high,p_improvement_le_0,selection_rule
+Method A,88.9%,77.8%,100.0%,-,filtered majority
+Method B final,92.6%,81.5%,100.0%,-,B conflict guard
+B_final - A improvement,3.7%,-7.4%,14.8%,0.395,-

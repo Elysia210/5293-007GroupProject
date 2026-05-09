@@ -1,0 +1,7 @@
+strategy,verifier_calls,calls_per_q
+Random (1 cand/q),186,1.0
+Majority Voting (0 verify),0,0.0
+Teacher GenRM (all cands),744,4.0
+Teacher-filtered Majority,744,4.0
+Method A QLoRA verifier,152,0.8172043010752689
+Method B Entropy-Masked verifier,152,0.8172043010752689
