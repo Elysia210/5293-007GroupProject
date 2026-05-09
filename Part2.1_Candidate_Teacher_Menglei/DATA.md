@@ -1,6 +1,8 @@
 # Data Documentation
 
-This document describes the data construction pipeline for the EG-GenRM project. The goal of this repository is not only to collect public math datasets, but to transform them into verifier-oriented supervised fine-tuning data.
+This document describes the data construction pipeline for the EG-GenRM to training. 
+The goal of this repository is not only to collect public math datasets and solution(right or wrong),
+but to transform them into verifier-oriented supervised fine-tuning data.
 
 The final training format is:
 
