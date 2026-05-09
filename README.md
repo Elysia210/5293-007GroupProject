@@ -2,7 +2,13 @@
 
 Team: Hantian Zhang (`hz3101`), Menglei Zhang (`mz3129`), Ruimin Zhang (`rz2737`).
 
-The project is about reasoning hallucinations in math problem solving. We train a small LM as a generative verifier (it writes Yes or No on candidate solutions), tweak the loss so it only updates on the most uncertain tokens, and use the verifier to filter candidates before majority voting. Code is split across three stages, one per teammate, each documented in its own section below.
+The project is about reasoning hallucinations in math problem solving. We train a small LM as a generative verifier (it writes Yes or No and give resons of why on candidate solutions),
+
+We attempt to use entropy to guide the training loss of the verifier, increasing focus on the reasoning nodes where the model is uncertain.
+
+Code is split across three stages, one per teammate, each documented in its own section below.
+
+This page briefly introduces the overall task. Please navigate to the README in each part's folder for specific code explanations and structural details.
 
 ---
 
@@ -12,16 +18,6 @@ Owner: Hantian Zhang.
 
 This stage prepares the GSM8K and MATH500 baseline outputs that the downstream evaluation reads. It produces direct-answer (no-CoT) predictions on both benchmarks, k=5 chain-of-thought candidate paths on MATH500, and the cleaned reference answers used to score them.
 
-Files consumed by Stage 3:
-
-```
-baseline/gsm8k_k5_run/direct_live.jsonl
-baseline/math500_k5_run/direct_live.jsonl
-baseline/math500_k5_run/candidate_paths.jsonl
-baseline/math500_k5_run/cleaned_samples.jsonl
-```
-
-Loaded in Part 2 of `EG_GenRM_finetuning_evaluation.ipynb` to report Direct, CoT pass@1, Majority Voting, and Best-of-N Oracle baselines on the full GSM8K (1000q) and MATH500 (500q × k=5) sets, separately from the 186q teacher-annotated subset.
 
 ---
 
@@ -29,15 +25,13 @@ Loaded in Part 2 of `EG_GenRM_finetuning_evaluation.ipynb` to report Direct, CoT
 
 Owner: Menglei Zhang.
 
-This stage samples multiple candidate reasoning paths per math question, constructs the four candidate roles (`correct_1`, `correct_2`, `subtle_wrong`, `random_wrong`) used downstream, and queries teacher models (Kimi-K2.5 and DeepSeek-V3.2) for a Yes/No verdict and an `earliest_error` annotation on each candidate. Each record carries the question, candidate solution, candidate's parsed final answer, ground-truth correctness label, teacher verdict, and teacher critique.
 
-File consumed by Stage 3:
 
 ```
-teacher_outputs_all_candidates (38).jsonl
+
 ```
 
-Stage 3 deduplicates on `question_norm`, then uses both the ground-truth labels (for verifier fine-tuning) and the teacher verdicts (as a separate baseline and as a teacher-filter signal at inference).
+
 
 ---
 
