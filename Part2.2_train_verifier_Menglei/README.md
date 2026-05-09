@@ -1,5 +1,55 @@
 # Verifier Training README
+```mermaid
+flowchart TD
+    A["Final Verifier SFT Data<br/>Question + Candidate Solution<br/>Rationale + Yes/No"] --> B["Load Base Model<br/>Qwen2.5-1.5B-Instruct"]
+    B --> C["Apply LoRA SFT"]
+    C --> D["Forward Pass"]
+    D --> E["Compute Token Loss<br/>Cross-Entropy"]
 
+    E --> F["Compute Token Entropy<br/>Model Uncertainty"]
+    F --> G["Identify High-Value Tokens<br/>Reasoning forks / error transitions / verdict tokens"]
+
+    G --> H{"Training Setting"}
+    H --> I["Vanilla GenRM<br/>Plain CE Loss"]
+    H --> J["Entropy-Guided GenRM<br/>Entropy-Weighted CE"]
+    H --> K["Verdict-Aware Entropy GenRM<br/>Entropy Weight + Yes/No Protection"]
+
+    I --> L["Backpropagation"]
+    J --> L
+    K --> L
+
+    L --> M["Monitor Training"]
+    M --> N["Loss Curve"]
+    M --> O["Format Validity"]
+    M --> P["Verdict Parse Rate"]
+    M --> Q["Validation Accuracy"]
+
+    N --> R{"Stable Convergence?"}
+    O --> R
+    P --> R
+    Q --> R
+
+    R -->|Yes| S["Continue Training<br/>Save Checkpoint"]
+    R -->|No| T["Adjust Hyperparameters"]
+
+    T --> U["Tune Learning Rate"]
+    T --> V["Tune Entropy Alpha"]
+    T --> W["Tune Top-k Ratio"]
+    T --> X["Tune Verdict Weight"]
+    T --> Y["Tune Batch Size / Grad Accumulation"]
+    T --> Z["Tune Max Sequence Length"]
+
+    U --> D
+    V --> D
+    W --> D
+    X --> D
+    Y --> D
+    Z --> D
+
+    S --> AA["Evaluate on Held-out Data"]
+    AA --> AB["Analyze TP / TN / FP / FN"]
+    AB --> AC["Final Verifier"]
+```
 This document explains the training pipeline for the EG-GenRM verifier.
 
 The goal is to train a generative verifier that can read a math problem and a candidate solution, then generate a step-by-step verification rationale and a final Yes/No correctness judgment.
