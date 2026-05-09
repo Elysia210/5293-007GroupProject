@@ -8,7 +8,7 @@ We attempt to use entropy to guide the training loss of the verifier, increasing
 
 Code is split across three stages, one per teammate, each documented in its own section below.
 
-This page briefly introduces the overall task. Please navigate to the README in each part's folder for specific code explanations and structural details.
+This page briefly introduces the overall task. Please navigate to the README in each part's folder for specific code explanations instruction and structural details.
 
 ---
 
@@ -16,12 +16,13 @@ This page briefly introduces the overall task. Please navigate to the README in 
 
 Owner: Hantian Zhang.
 
+* **Part 1:**
 This stage prepares the GSM8K and MATH500 baseline outputs that the downstream evaluation reads. It produces direct-answer (no-CoT) predictions on both benchmarks, k=5 chain-of-thought candidate paths on MATH500, and the cleaned reference answers used to score them.
 
 
 ---
 
-## Stage 2: Train data Generation and training
+## Stage 2: Train data Generation and training with entropy-guided perfomance analysis
 **Owner:** Menglei Zhang.
 
 * **Part 2.1:** Introduces a novel, low-cost method to generate high-quality data for training the generative mathematical reasoning verifier.
@@ -33,6 +34,7 @@ This stage prepares the GSM8K and MATH500 baseline outputs that the downstream e
 
 Owner: Ruimin Zhang.
 
+* **Part 3:**
 This stage takes the Stage 2 candidate file (which contains candidate solutions, ground-truth correctness labels, and teacher-verifier annotations) and the Stage 1 baseline outputs, fine-tunes two QLoRA verifiers on Qwen2.5-1.5B-Instruct, and runs the evaluation that goes into the final report. Both verifiers output a Yes/No verdict; the difference is just the loss function.
 
 ---
