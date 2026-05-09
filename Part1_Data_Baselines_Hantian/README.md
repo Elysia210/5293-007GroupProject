@@ -311,7 +311,7 @@ python src/main_step1.py \
 
 ---
 
-## Optional direct baseline
+## Direct baseline
 
 ```bash
 python run_direct_model.py \
