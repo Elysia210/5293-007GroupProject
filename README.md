@@ -12,6 +12,7 @@ We attempt to use entropy to guide the training loss of the verifier, increasing
 Code is split across three stages, one per teammate, each documented in its own section below.
 
 This page briefly introduces the overall task. Please navigate to the README in each part's folder for specific code explanations instruction and structural details.
+<img width="1902" height="78" alt="image" src="https://github.com/user-attachments/assets/b717a7b7-a13c-489f-a3d6-f17fa2b52c60" />
 
 ---
 
