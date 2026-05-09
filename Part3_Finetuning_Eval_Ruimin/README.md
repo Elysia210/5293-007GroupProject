@@ -51,10 +51,10 @@ Predictive entropy is `H_t = -sum_v p_v log p_v` over the vocab at position t. H
 
 Hardware: tested on Colab A100-40GB. The QLoRA setup is expected to fit on a 24GB GPU, but A100-40GB was the primary tested environment. End-to-end runtime is around 40 minutes; the two QLoRA training runs take about 15 minutes each.
 
-Software: the first cell of the notebook installs everything inline. Alternatively, the top-level `requirements.txt` covers the same packages:
+Software: the first cell of the notebook installs everything inline. Alternatively, this folder's `requirements.txt` covers the same packages:
 
 ```bash
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 ```
 
 Tested with Python 3.10, torch 2.1+, CUDA 12.4. Qwen2.5-1.5B-Instruct downloads from Hugging Face on first run, so set `HF_TOKEN` if you hit anonymous-download rate limits.

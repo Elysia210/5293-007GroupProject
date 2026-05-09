@@ -1,0 +1,14 @@
+transformers
+datasets
+accelerate
+peft
+bitsandbytes
+safetensors
+scikit-learn
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+torch
+google-colab
