@@ -14,17 +14,24 @@ The teacher (Kimi-K2.5 + DeepSeek-V3.2) already gets 91.5% candidate-level accur
 Part3_Finetuning_Eval_Ruimin/
 ├── README.md                                   (this file)
 ├── EG_GenRM_finetuning_evaluation.ipynb        (the notebook)
-├── teacher_outputs_all_candidates (38).jsonl   (input from Part 2)
-├── baseline/                                   (input from Part 1)
+├── teacher_outputs_all_candidates (38).jsonl   (input from Part 2 - NOT INCLUDED IN REPO)
+├── baseline/                                   (input from Part 1 - NOT INCLUDED IN REPO)
 │   ├── gsm8k_k5_run/direct_live.jsonl
 │   └── math500_k5_run/
 │       ├── direct_live.jsonl
 │       ├── candidate_paths.jsonl
 │       └── cleaned_samples.jsonl
-├── outputs/                                    (LoRA adapters, written at runtime)
-├── results/                                    (CSVs, written at runtime)
-└── figures/                                    (PNGs, written at runtime)
+├── outputs/                                    (LoRA adapters, written at runtime - NOT INCLUDED IN REPO)
+├── results/                                    (CSVs, included in repo - generated results)
+└── figures/                                    (PNGs, included in repo - generated figures)
 ```
+
+**Note:** Large data files (baseline datasets, model outputs, and teacher outputs) are not included in this repository due to GitHub file size limits. To run the notebook:
+
+1. Obtain baseline data from Part 1 (Hantian) and place in `baseline/` directory
+2. Obtain teacher outputs from Part 2 (Menglei) and place as `teacher_outputs_all_candidates (38).jsonl`
+3. Run the notebook - it will generate `outputs/` directory
+4. `results/` and `figures/` are included in the repo as they contain the final analysis outputs
 
 ## Concepts
 

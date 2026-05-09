@@ -1,6 +1,3 @@
-method,accuracy,scope
-Direct — GSM8K,0.978,GSM8K 1000
-Direct — MATH500,0.816,MATH500 500
-CoT pass@1 — MATH500,0.638,MATH500 500q k5
-Majority Voting — MATH500,0.664,MATH500 500q k5
-Best-of-N Oracle — MATH500,0.732,MATH500 500q k5
+version https://git-lfs.github.com/spec/v1
+oid sha256:10f93a015377943dc695639f8a9f263f06b5218401e28de08cacd582571dac5b
+size 239

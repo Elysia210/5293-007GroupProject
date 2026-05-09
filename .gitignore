@@ -1,5 +1,7 @@
-﻿# Large model checkpoints and outputs
+﻿# Large datasets and outputs
+Part3_Finetuning_Eval_Ruimin/baseline/
 Part3_Finetuning_Eval_Ruimin/outputs/
+Part3_Finetuning_Eval_Ruimin/*.jsonl
 *.pt
 *.pth
 *.safetensors

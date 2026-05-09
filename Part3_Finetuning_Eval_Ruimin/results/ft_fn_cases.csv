@@ -1,10 +1,3 @@
-question_norm,candidate_role,true_label,pred_label,generated_text
-"for a constant $c,$ in spherical coordinates $(\rho,\theta,\phi),$ find the shape described by the equation \[\theta = c.\](a) line (b) circle (c) plane (d) sphere (e) cylinder (f) cone enter the letter of the correct option.",correct_1,Yes,No,<final_verdict>No</final_verdict>
-"for a constant $c,$ in spherical coordinates $(\rho,\theta,\phi),$ find the shape described by the equation \[\theta = c.\](a) line (b) circle (c) plane (d) sphere (e) cylinder (f) cone enter the letter of the correct option.",correct_2,Yes,No,<final_verdict>No</final_verdict>
-"stephen made 10 round trips up and down a 40,000 foot tall mountain. if he reached 3/4 of the mountain's height on each of his trips, calculate the total distance he covered.",correct_2,Yes,No,<final_verdict>No</final_verdict>
-what is the sum of the greatest common factor of 3 and 6 and the least common multiple of 3 and 6?,correct_1,Yes,No,<final_verdict>No</final_verdict>
-mark deposited $88 in a bank. bryan deposited $40 less than five times as much as mark. how much did mark deposit in the bank?,correct_1,Yes,No,<final_verdict>No</final_verdict>
-balki is counting the number of raisins in boxes of cereal. he counted 437 total raisins in 5 boxes. in one box he counted 72 raisins. in a second box he counted 74 raisins. the other three boxes had the same number each. how many were in each of the other three boxes?,correct_1,Yes,No,<final_verdict>No</final_verdict>
-balki is counting the number of raisins in boxes of cereal. he counted 437 total raisins in 5 boxes. in one box he counted 72 raisins. in a second box he counted 74 raisins. the other three boxes had the same number each. how many were in each of the other three boxes?,correct_2,Yes,No,<final_verdict>No</final_verdict>
-"luke takes a 70-minute bus to work every day. his coworker paula takes 3/5 of this time to arrive by bus at work. if luke takes a bike ride back home every day, 5 times slower than the bus, and paula takes the bus back home, calculate the total amount of time, in minutes, they take traveling from home to work and back each day.",correct_1,Yes,No,<final_verdict>No</final_verdict>
-jason has a carriage house that he rents out. he’s charging $50.00 per day or $500.00 for 14 days. eric wants to rent the house for 20 days. how much will it cost him?,correct_2,Yes,No,<final_verdict>No</final_verdict>
+version https://git-lfs.github.com/spec/v1
+oid sha256:2f4a53e7cd64109cdd4b464e0373a708f0955c54475072821484049a069ae96f
+size 2426
