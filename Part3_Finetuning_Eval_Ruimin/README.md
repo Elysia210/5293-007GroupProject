@@ -1,57 +1,32 @@
-# EG-GenRM: Entropy-Guided Generative Reward Model
+# Part 3: Fine-tuning and Evaluation
 
-Team: Hantian Zhang (`hz3101`), Menglei Zhang (`mz3129`), Ruimin Zhang (`rz2737`).
+Owner: Ruimin Zhang (`rz2737`). Part of the team EG-GenRM project (see the top-level repo `README.md` for project context and team overview).
 
-The project is about reasoning hallucinations in math problem solving. We train a small LM as a generative verifier (it writes Yes or No on candidate solutions), tweak the loss so it only updates on the most uncertain tokens, and use the verifier to filter candidates before majority voting. Code is split across three stages, one per teammate, each documented in its own section below.
-
----
-
-## Stage 1: Data Preparation and Baselines
-
-Owner: Hantian Zhang.
-
-This stage prepares the GSM8K and MATH500 baseline outputs that the downstream evaluation reads. It produces direct-answer (no-CoT) predictions on both benchmarks, k=5 chain-of-thought candidate paths on MATH500, and the cleaned reference answers used to score them.
-
-Files consumed by Stage 3:
-
-```
-baseline/gsm8k_k5_run/direct_live.jsonl
-baseline/math500_k5_run/direct_live.jsonl
-baseline/math500_k5_run/candidate_paths.jsonl
-baseline/math500_k5_run/cleaned_samples.jsonl
-```
-
-Loaded in Part 2 of `EG_GenRM_finetuning_evaluation.ipynb` to report Direct, CoT pass@1, Majority Voting, and Best-of-N Oracle baselines on the full GSM8K (1000q) and MATH500 (500q × k=5) sets, separately from the 186q teacher-annotated subset.
-
----
-
-## Stage 2: Candidate Generation and Teacher Annotation
-
-Owner: Menglei Zhang.
-
-This stage samples multiple candidate reasoning paths per math question, constructs the four candidate roles (`correct_1`, `correct_2`, `subtle_wrong`, `random_wrong`) used downstream, and queries teacher models (Kimi-K2.5 and DeepSeek-V3.2) for a Yes/No verdict and an `earliest_error` annotation on each candidate. Each record carries the question, candidate solution, candidate's parsed final answer, ground-truth correctness label, teacher verdict, and teacher critique.
-
-File consumed by Stage 3:
-
-```
-teacher_outputs_all_candidates (38).jsonl
-```
-
-Stage 3 deduplicates on `question_norm`, then uses both the ground-truth labels (for verifier fine-tuning) and the teacher verdicts (as a separate baseline and as a teacher-filter signal at inference).
-
----
-
-## Stage 3: Fine-tuning and Evaluation
-
-Owner: Ruimin Zhang.
-
-This stage takes the Stage 2 candidate file (which contains candidate solutions, ground-truth correctness labels, and teacher-verifier annotations) and the Stage 1 baseline outputs, fine-tunes two QLoRA verifiers on Qwen2.5-1.5B-Instruct, and runs the evaluation that goes into the final report. Both verifiers output a Yes/No verdict; the difference is just the loss function.
+This part takes the candidate file produced by Part 2 (Menglei) and the baseline outputs produced by Part 1 (Hantian), fine-tunes two QLoRA verifiers on Qwen2.5-1.5B-Instruct, and runs the unified evaluation that goes into the final report. Both verifiers output a Yes/No verdict; the difference is just the loss function.
 
 Method A is plain QLoRA with standard cross-entropy on the verdict token. Method B (EG-GenRM) is the same setup but the loss only flows through the top-20% highest-entropy tokens at each step. The motivation, set out in our proposal, is to treat high-entropy tokens as likely "logical fork" points where the model is genuinely uncertain about the next reasoning decision, while low-entropy tokens are mostly templates and connectors that already predict cleanly. Masking out the easy tokens concentrates updates on the forks.
 
 The teacher (Kimi-K2.5 + DeepSeek-V3.2) already gets 91.5% candidate-level accuracy with 97.1% recall, but it produces 50 false positives. Teacher-naive selection drops to 89.2%, worse than plain Majority Voting at 93.5%, so the actual job is to combine high recall with a selection rule that survives those FPs. Method B reaches 100% on the 38-question held-out test set, vs 94.7% for Majority Voting and 97.4% for Method A.
 
-### Concepts
+## Folder layout
+
+```
+Part3_Finetuning_Eval_Ruimin/
+├── README.md                                   (this file)
+├── EG_GenRM_finetuning_evaluation.ipynb        (the notebook)
+├── teacher_outputs_all_candidates (38).jsonl   (input from Part 2)
+├── baseline/                                   (input from Part 1)
+│   ├── gsm8k_k5_run/direct_live.jsonl
+│   └── math500_k5_run/
+│       ├── direct_live.jsonl
+│       ├── candidate_paths.jsonl
+│       └── cleaned_samples.jsonl
+├── outputs/                                    (LoRA adapters, written at runtime)
+├── results/                                    (CSVs, written at runtime)
+└── figures/                                    (PNGs, written at runtime)
+```
+
+## Concepts
 
 Some terms used in the notebook:
 
@@ -65,36 +40,21 @@ Group-aware split means train/val/test are split by `question_norm`, so all four
 
 Predictive entropy is `H_t = -Σ_v p_v log p_v` over the vocab at position t. High entropy roughly tracks the model being uncertain about the next token, which empirically lines up with logical decision points in a chain of reasoning.
 
-### Setup
+## Setup
 
 Hardware: a GPU with at least 24GB. Tested on Colab A100-40GB. End-to-end runtime is around 40 minutes; the two QLoRA training runs take about 15 minutes each.
 
-Software: the first cell of the notebook installs everything. For reference:
+Software: the first cell of the notebook installs everything inline. Alternatively, the top-level `requirements.txt` covers the same packages:
 
 ```bash
-pip install transformers datasets accelerate peft bitsandbytes safetensors \
-            scikit-learn numpy pandas matplotlib seaborn tqdm
+pip install -r ../requirements.txt
 ```
 
 Tested with Python 3.10, torch 2.1+, CUDA 12.4. Qwen2.5-1.5B-Instruct downloads from Hugging Face on first run, so set `HF_TOKEN` if you hit anonymous-download rate limits.
 
-Inputs needed under the project root:
+## Inputs needed
 
-```
-<PROJECT_ROOT>/
-├── teacher_outputs_all_candidates (38).jsonl    (from Stage 2 - INCLUDED IN REPO)
-└── baseline/                                    (from Stage 1 - INCLUDED IN REPO)
-    ├── gsm8k_k5_run/
-    │   └── direct_live.jsonl
-    └── math500_k5_run/
-        ├── direct_live.jsonl
-        ├── candidate_paths.jsonl
-        └── cleaned_samples.jsonl
-```
-
-**Note:** Large model checkpoint files (*.pt, *.pth, *.safetensors, *.bin) and the `outputs/` directory are not included in this repository due to GitHub file size limits. The notebook will download the base model automatically and generate the outputs during runtime.
-
-Each record in the teacher JSONL has at minimum these fields: `question_norm`, `candidate_role`, `candidate_solution_clean` (or `_raw`), `candidate_predicted_answer`, `expected_answer`, `candidate_is_correct`, `parsed_final_verdict` (Yes / No / None), `teacher_model`, `earliest_error`, `run_id`.
+Each record in `teacher_outputs_all_candidates (38).jsonl` has at minimum these fields: `question_norm`, `candidate_role`, `candidate_solution_clean` (or `_raw`), `candidate_predicted_answer`, `expected_answer`, `candidate_is_correct`, `parsed_final_verdict` (Yes / No / None), `teacher_model`, `earliest_error`, `run_id`.
 
 After dedup on `question_norm` (keep the run with the most complete role coverage; ties broken by global `run_id` frequency), we get 751 deduplicated records from 189 unique questions, of which 186 have all four roles (744 candidates). The full 186-group set is used for heuristic / teacher selection evaluation. For SFT we keep all 751 deduplicated records and apply a group-aware ~60/20/20 split by `question_norm` (`GroupShuffleSplit(test_size=0.40)` then `GroupShuffleSplit(test_size=0.50)`):
 
@@ -104,28 +64,30 @@ After dedup on `question_norm` (keep the run with the most complete role coverag
 | val   | 38  | 148 |
 | test  | 38  | 152 |
 
-Paths and key hyperparameters live in `PROJECT_CONFIG` at the top of Part 0; only `project_dir` needs to change for a different environment.
+## Configuration
+
+Paths and key hyperparameters live in `PROJECT_CONFIG` at the top of Part 0. Set `project_dir` to this Part 3 folder; everything else is relative to that and can be left at the defaults to reproduce the reported numbers.
 
 ```python
 PROJECT_CONFIG = {
-    "project_dir": "/content/drive/MyDrive/Colab Notebooks/5293-007/group_project",
-    "json_path": "teacher_outputs_all_candidates (38).jsonl",
-    "baseline_dir": "baseline/",
-    "figures_dir": "figures/",
-    "results_dir": "results/",
-    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
-    "max_len": 1024,
+    "project_dir":   "/content/drive/MyDrive/.../5293-007GroupProject/Part3_Finetuning_Eval_Ruimin",
+    "json_path":     "teacher_outputs_all_candidates (38).jsonl",
+    "baseline_dir":  "baseline/",
+    "figures_dir":   "figures/",
+    "results_dir":   "results/",
+    "model_name":    "Qwen/Qwen2.5-1.5B-Instruct",
+    "max_len":       1024,
     "entropy_top_k": 0.20,
 }
 ```
 
-`figures/` and `results/` are auto-created.
+`figures/`, `results/`, and `outputs/` are auto-created if missing.
 
-### How to run
+## How to run
 
-1. Open the notebook in Colab (or local Jupyter with CUDA 11.8+).
+1. Open `EG_GenRM_finetuning_evaluation.ipynb` in Colab (or local Jupyter with CUDA 11.8+).
 2. Run the first cell to install packages.
-3. Mount Drive (Colab) or update `PROJECT_CONFIG["project_dir"]` (local).
+3. Mount Drive (Colab) or update `PROJECT_CONFIG["project_dir"]` (local) so it points at this Part 3 folder.
 4. Run all cells.
 
 The 13 parts:
@@ -134,7 +96,7 @@ The 13 parts:
 |---|---|
 | 0  | env, install, `PROJECT_CONFIG` |
 | 1  | research questions, pipeline overview |
-| 2  | load teacher data, dedup → 186 complete groups, integrate Hantian baselines |
+| 2  | load teacher data, dedup → 186 complete groups, integrate Part 1 baselines |
 | 3  | heuristic baselines (random, majority, oracle) |
 | 4  | teacher GenRM candidate-level metrics + per-role breakdown |
 | 5  | inference-time selection-strategy comparison on the full 186q set |
@@ -149,33 +111,39 @@ The 13 parts:
 
 Random sources used in the data split, evaluation sampling, and bootstrap are seeded with `random.seed(42)`, `np.random.seed(42)`, `GroupShuffleSplit(random_state=42)`, and `np.random.default_rng(0)`. Small numerical differences may still occur across GPU environments, library versions, and training runs because full CUDA-level determinism is not enforced.
 
-### Generated outputs
+## Generated outputs
 
-Running the notebook writes CSVs under `results/` and figures under `figures/`:
+The notebook writes results into this folder:
 
 ```
-results/strategy_comparison.csv
-results/same_split_comparison.csv
-results/ablation_results_final.csv
-results/verifier_per_role_metrics.csv
-results/error_taxonomy.csv
-results/failure_cases_FP.csv
-results/failure_cases_FN.csv
-results/error_transition_A_vs_B.csv
-results/efficiency_summary.csv
+results/
+├── strategy_comparison.csv
+├── same_split_comparison.csv
+├── ablation_results_final.csv
+├── verifier_per_role_metrics.csv
+├── error_taxonomy.csv
+├── failure_cases_FP.csv
+├── failure_cases_FN.csv
+├── error_transition_A_vs_B.csv
+└── efficiency_summary.csv
 
-figures/strategy_comparison.png
-figures/same_split_comparison.png
-figures/confusion_matrix_teacher.png
-figures/confusion_matrix_A_vs_B.png
-figures/bootstrap_ci_A_vs_B.png
-figures/error_transition_A_to_B.png
-figures/error_taxonomy_by_role.png
+figures/
+├── strategy_comparison.png
+├── same_split_comparison.png
+├── confusion_matrix_teacher.png
+├── confusion_matrix_A_vs_B.png
+├── bootstrap_ci_A_vs_B.png
+├── error_transition_A_to_B.png
+└── error_taxonomy_by_role.png
+
+outputs/
+├── verifier_lora_qwen15b_verdict_only/   (Method A LoRA adapter)
+└── verifier_lora_eg_genrm/               (Method B LoRA adapter)
 ```
 
-Plus the trained adapters under `outputs/verifier_lora_qwen15b_verdict_only/` (Method A) and `outputs/verifier_lora_eg_genrm/` (Method B), and the per-candidate verdict files `finetuned_verifier_predictions_verdict_only.jsonl` (A) and `finetuned_verifier_predictions_eg_genrm.jsonl` (B).
+Plus the per-candidate verdict files `finetuned_verifier_predictions_verdict_only.jsonl` (A) and `finetuned_verifier_predictions_eg_genrm.jsonl` (B), saved at the project root.
 
-### Method
+## Method
 
 Both methods share the same base, quantization, LoRA config, training data, splits, optimizer, lr, and epoch count. Only the loss differs.
 
@@ -234,7 +202,7 @@ At inference the verifier emits Yes/No on each of the four candidates per questi
 - Filtered Majority: most common candidate answer in the Yes pool, tie-break by global support across all four.
 - Conflict-Guarded Majority (used for Method B): same as filtered majority, but if the Yes-pool majority disagrees with the global majority and the global majority has at least 2 votes plus one Yes-marked supporter, pick the global majority. This is a safety rule for cases where verifier FPs would form a wrong majority within the Yes pool. On this test split the guard didn't actually activate (all 38 selections went through the regular Yes-majority path), so Method B's 100% comes from the verifier itself rather than from the rule kicking in.
 
-### Results
+## Results
 
 Teacher GenRM baseline on 718 valid verdicts: 91.5% acc, 87.9% precision, 97.1% recall, F1 0.922. Per-role: 97.3% / 96.8% on correct_1 / correct_2 (almost no false negatives on real correct candidates), but 50 FPs concentrated on random_wrong (34) and subtle_wrong (16). This is the noise the fine-tuned verifier has to absorb.
 
@@ -273,9 +241,9 @@ Same-split (n=38) head-to-head with the fine-tuned verifiers:
 
 Paired bootstrap (2000 iterations) on Method B − Method A: +2.6pp, 95% CI [0.0%, 7.9%], one-sided p = 0.370. Positive but inconclusive at n=38; we don't claim significance.
 
-Verifier-call cost: on the 38-question test split, both Method A and Method B run the verifier on all 4 candidates per question, so each is 152 calls (4 calls/question) on the test set. Teacher GenRM annotation in Stage 2 covered the full 186-question complete-group set at 744 calls (4 calls/question). Per-question rate is the same; the totals only differ because the scopes differ. We don't claim a 5× call reduction.
+Verifier-call cost: on the 38-question test split, both Method A and Method B run the verifier on all 4 candidates per question, so each is 152 calls (4 calls/question) on the test set. Teacher GenRM annotation in Part 2 covered the full 186-question complete-group set at 744 calls (4 calls/question). Per-question rate is the same; the totals only differ because the scopes differ. We don't claim a 5× call reduction.
 
-### Limitations
+## Limitations
 
 The 186q table and the 38q table are not directly comparable. Heuristic baselines and the teacher GenRM run on the full 186 complete groups, while the fine-tuned verifiers can only run on the 38q test split because the other 148 questions are train+val. We report the two scopes separately and don't cross-compare.
 
@@ -285,10 +253,10 @@ All numbers are on Qwen2.5-1.5B-Instruct only. We don't claim entropy masking tr
 
 The training labels come from `candidate_is_correct` (gold), which is reliable, but the teacher GenRM baseline numbers we compare against are produced by an LLM and the teacher itself is imperfect: Part 4 shows non-trivial teacher disagreement on subtle_wrong and random_wrong candidates.
 
-The Hantian baselines in Part 2 run on the full GSM8K (1000q) and MATH500 (500q × k=5), while teacher and fine-tuned methods only run on the 186q teacher-annotated subset. The two scopes are reported separately.
+The Part 1 baselines run on the full GSM8K (1000q) and MATH500 (500q × k=5), while teacher and fine-tuned methods only run on the 186q teacher-annotated subset. The two scopes are reported separately.
 
 The conflict-guard inference rule didn't activate on this 38-question test split. Method B's 100% should be read as "EG-GenRM verifier + filtered-majority selection" rather than evidence that the guard rule itself was useful here. Whether the guard helps on harder splits is open.
 
-### Contribution
+## Contribution
 
-This stage builds the SFT dataset on top of the upstream candidate annotations, trains both the standard QLoRA baseline and the entropy-masked EG-GenRM verifier under one shared config, and runs the same-split evaluation that integrates baselines, teacher outputs, fine-tuned verifiers, and the selection rules. The CSVs and figures it produces are what go into the final report and slides.
+This part builds the SFT dataset on top of the upstream candidate annotations, trains both the standard QLoRA baseline and the entropy-masked EG-GenRM verifier under one shared config, and runs the same-split evaluation that integrates baselines, teacher outputs, fine-tuned verifiers, and the selection rules. The CSVs and figures it produces are what go into the final report and slides.
