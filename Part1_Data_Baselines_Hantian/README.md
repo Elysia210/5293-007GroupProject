@@ -83,7 +83,7 @@ data/final/
 
 ---
 
-## 5. Optional: Run Direct Baseline
+## 5. Run Direct Baseline
 
 The direct baseline is generated separately from the multi-path CoT pipeline.
 
