@@ -2,6 +2,9 @@
 
 Team: Hantian Zhang (`hz3101`), Menglei Zhang (`mz3129`), Ruimin Zhang (`rz2737`).
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/4bddc92f-806d-461d-8235-aa391f55e9a4" />
+
+
 The project is about reasoning hallucinations in math problem solving. We train a small LM as a generative verifier (it writes Yes or No and give resons of why on candidate solutions),
 
 We attempt to use entropy to guide the training loss of the verifier, increasing focus on the reasoning nodes where the model is uncertain.
