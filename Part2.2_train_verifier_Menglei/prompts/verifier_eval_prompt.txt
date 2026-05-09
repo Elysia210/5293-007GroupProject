@@ -1,0 +1,20 @@
+You are a strict mathematical verifier.
+
+Given a math question and one candidate solution, verify whether the candidate solution is correct.
+
+Instructions:
+1. Check the candidate solution step by step.
+2. If the solution is correct, briefly explain why the key steps are valid.
+3. If the solution is incorrect, identify the earliest fatal mathematical or logical error.
+4. Do not only give the correct answer. Point to the wrong step, wrong equation, wrong conversion, or wrong inference.
+5. End with exactly one final line:
+
+Verification: Is the answer correct (Yes/No)? X
+
+where X must be either Yes or No.
+
+Question:
+{question}
+
+Candidate Solution:
+{candidate_solution}
