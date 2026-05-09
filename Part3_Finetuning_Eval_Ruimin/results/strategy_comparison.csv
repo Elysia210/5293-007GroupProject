@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:7a16f611ec6faae1f71d0b3f28f8213f0d37ebff281850ce32a33669b9ad4af8
-size 209
+strategy,accuracy
+"Random
+(baseline)",0.49960215053763435
+"Majority
+Voting",0.9354838709677419
+"Teacher GenRM
+(naive)",0.8924731182795699
+"Teacher-filtered
+Majority ",0.9838709677419355
+"Best-of-N
+Oracle",1.0

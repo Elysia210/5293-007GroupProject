@@ -1,3 +1,9 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:93a609a51dcebac1fc5b18cc9fd49a495682e039759fe86cd2c4403bb3aa15eb
-size 189
+error_type,count
+Generalization / variable error,123
+Incorrect conclusion,75
+Other,59
+Arithmetic error,42
+No error,39
+Reasoning / logic error,30
+Problem misinterpretation,7
+Wrong formula,1
