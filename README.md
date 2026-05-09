@@ -41,4 +41,6 @@ Owner: Ruimin Zhang.
 * **Part 3:**
 This stage takes the Stage 2 candidate file (which contains candidate solutions, ground-truth correctness labels, and teacher-verifier annotations) and the Stage 1 baseline outputs, fine-tunes two QLoRA verifiers on Qwen2.5-1.5B-Instruct, and runs the evaluation that goes into the final report. Both verifiers output a Yes/No verdict; the difference is just the loss function.
 
+When reproducing Part 3 locally, place the baseline files consumed by the Part 3 evaluation notebook under `Part3_Finetuning_Eval_Ruimin/baseline/`.
+
 ---

@@ -6,24 +6,24 @@ This part takes the candidate file produced by Part 2 (Menglei) and the baseline
 
 Method A is plain QLoRA with standard cross-entropy on the verdict token. Method B (EG-GenRM) is the same setup but the loss only flows through the top-20% highest-entropy tokens at each step. The motivation, set out in our proposal, is to treat high-entropy tokens as likely "logical fork" points where the model is genuinely uncertain about the next reasoning decision, while low-entropy tokens are mostly templates and connectors that already predict cleanly. Masking out the easy tokens concentrates updates on the forks.
 
-The teacher (Kimi-K2.5 + DeepSeek-V3.2) already gets 91.5% candidate-level accuracy with 97.1% recall, but it produces 50 false positives. Teacher-naive selection drops to 89.2%, worse than plain Majority Voting at 93.5%, so the actual job is to combine high recall with a selection rule that survives those FPs. Method B reaches 100% on the 38-question held-out test set, vs 94.7% for Majority Voting and 97.4% for Method A.
+The teacher (Kimi-K2.5 + DeepSeek-V3.2) already gets 91.5% candidate-level accuracy with 97.1% recall, but it produces 50 false positives. Teacher-naive selection drops to 89.2%, worse than plain Majority Voting at 93.5%, so the actual job is to combine high recall with a selection rule that survives those FPs. Method B reaches 100% on the 38-question held-out test set, vs 94.7% for Majority Voting and 97.4% for Method A, although this result is statistically inconclusive because the held-out split is small.
 
 ## Folder layout
 
 ```
 Part3_Finetuning_Eval_Ruimin/
-├── README.md                                   (this file)
-├── EG_GenRM_finetuning_evaluation.ipynb        (the notebook)
-├── teacher_outputs_all_candidates (38).jsonl   (input from Part 2 - NOT INCLUDED IN REPO)
-├── baseline/                                   (input from Part 1 - NOT INCLUDED IN REPO)
-│   ├── gsm8k_k5_run/direct_live.jsonl
-│   └── math500_k5_run/
-│       ├── direct_live.jsonl
-│       ├── candidate_paths.jsonl
-│       └── cleaned_samples.jsonl
-├── outputs/                                    (LoRA adapters, written at runtime - NOT INCLUDED IN REPO)
-├── results/                                    (CSVs, included in repo - generated results)
-└── figures/                                    (PNGs, included in repo - generated figures)
+|-- README.md                                   (this file)
+|-- EG_GenRM_finetuning_evaluation.ipynb        (the notebook)
+|-- teacher_outputs_all_candidates (38).jsonl   (input from Part 2 - NOT INCLUDED IN REPO)
+|-- baseline/                                   (input from Part 1 - NOT INCLUDED IN REPO)
+|   |-- gsm8k_k5_run/direct_live.jsonl
+|   `-- math500_k5_run/
+|       |-- direct_live.jsonl
+|       |-- candidate_paths.jsonl
+|       `-- cleaned_samples.jsonl
+|-- outputs/                                    (LoRA adapters, written at runtime - NOT INCLUDED IN REPO)
+|-- results/                                    (CSVs, included in repo - generated results)
+`-- figures/                                    (PNGs, included in repo - generated figures)
 ```
 
 **Note:** Large data files (baseline datasets, model outputs, and teacher outputs) are not included in this repository due to GitHub file size limits. To run the notebook:
@@ -45,11 +45,11 @@ QLoRA loads the base weights in 4-bit and adds a small low-rank adapter that is 
 
 Group-aware split means train/val/test are split by `question_norm`, so all four candidates of one question stay in one split. Without this, the verifier could memorize a question through one candidate and be tested on another candidate of the same question, inflating numbers.
 
-Predictive entropy is `H_t = -Σ_v p_v log p_v` over the vocab at position t. High entropy roughly tracks the model being uncertain about the next token, which empirically lines up with logical decision points in a chain of reasoning.
+Predictive entropy is `H_t = -sum_v p_v log p_v` over the vocab at position t. High entropy roughly tracks the model being uncertain about the next token, which empirically lines up with logical decision points in a chain of reasoning.
 
 ## Setup
 
-Hardware: a GPU with at least 24GB. Tested on Colab A100-40GB. End-to-end runtime is around 40 minutes; the two QLoRA training runs take about 15 minutes each.
+Hardware: tested on Colab A100-40GB. The QLoRA setup is expected to fit on a 24GB GPU, but A100-40GB was the primary tested environment. End-to-end runtime is around 40 minutes; the two QLoRA training runs take about 15 minutes each.
 
 Software: the first cell of the notebook installs everything inline. Alternatively, the top-level `requirements.txt` covers the same packages:
 
@@ -103,7 +103,7 @@ The 13 parts:
 |---|---|
 | 0  | env, install, `PROJECT_CONFIG` |
 | 1  | research questions, pipeline overview |
-| 2  | load teacher data, dedup → 186 complete groups, integrate Part 1 baselines |
+| 2  | load teacher data, dedup -> 186 complete groups, integrate Part 1 baselines |
 | 3  | heuristic baselines (random, majority, oracle) |
 | 4  | teacher GenRM candidate-level metrics + per-role breakdown |
 | 5  | inference-time selection-strategy comparison on the full 186q set |
@@ -124,28 +124,28 @@ The notebook writes results into this folder:
 
 ```
 results/
-├── strategy_comparison.csv
-├── same_split_comparison.csv
-├── ablation_results_final.csv
-├── verifier_per_role_metrics.csv
-├── error_taxonomy.csv
-├── failure_cases_FP.csv
-├── failure_cases_FN.csv
-├── error_transition_A_vs_B.csv
-└── efficiency_summary.csv
+|-- strategy_comparison.csv
+|-- same_split_comparison.csv
+|-- ablation_results_final.csv
+|-- verifier_per_role_metrics.csv
+|-- error_taxonomy.csv
+|-- failure_cases_FP.csv
+|-- failure_cases_FN.csv
+|-- error_transition_A_vs_B.csv
+`-- efficiency_summary.csv
 
 figures/
-├── strategy_comparison.png
-├── same_split_comparison.png
-├── confusion_matrix_teacher.png
-├── confusion_matrix_A_vs_B.png
-├── bootstrap_ci_A_vs_B.png
-├── error_transition_A_to_B.png
-└── error_taxonomy_by_role.png
+|-- strategy_comparison.png
+|-- same_split_comparison.png
+|-- confusion_matrix_teacher.png
+|-- confusion_matrix_A_vs_B.png
+|-- bootstrap_ci_A_vs_B.png
+|-- error_transition_A_to_B.png
+`-- error_taxonomy_by_role.png
 
 outputs/
-├── verifier_lora_qwen15b_verdict_only/   (Method A LoRA adapter)
-└── verifier_lora_eg_genrm/               (Method B LoRA adapter)
+|-- verifier_lora_qwen15b_verdict_only/   (Method A LoRA adapter)
+`-- verifier_lora_eg_genrm/               (Method B LoRA adapter)
 ```
 
 Plus the per-candidate verdict files `finetuned_verifier_predictions_verdict_only.jsonl` (A) and `finetuned_verifier_predictions_eg_genrm.jsonl` (B), saved at the project root.
@@ -195,10 +195,10 @@ Method A: standard cross-entropy on the completion tokens. Prompt tokens are mas
 Method B: same loss, masked to the top 20% highest-entropy tokens computed online from the verifier's own logits at each step:
 
 ```
-H_t        = -Σ_v softmax(logits_t)_v · log_softmax(logits_t)_v
+H_t        = -sum_v softmax(logits_t)_v * log_softmax(logits_t)_v
 threshold  = quantile(H_t over completion tokens, 1 - entropy_top_k)
-M_t        = (H_t ≥ threshold) AND (label_t ≠ -100)
-L_EG-GenRM = -Σ_t M_t · log P(y_t | x, y_<t) / Σ_t M_t
+M_t        = (H_t >= threshold) AND (label_t != -100)
+L_EG-GenRM = -sum_t M_t * log P(y_t | x, y_<t) / sum_t M_t
 ```
 
 Implemented as `EntropyMaskedTrainer` overriding `compute_loss()`. The threshold is recomputed every step.
