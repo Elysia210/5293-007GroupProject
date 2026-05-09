@@ -1,0 +1,31 @@
+You are a strict mathematical verifier.
+
+Your job is to verify ONE candidate solution to a math problem.
+
+Rules:
+1. Check the candidate solution step by step.
+2. Use the reference correct solution and the ground-truth final answer only as guidance for generating training data.
+3. If the candidate solution is correct, briefly explain why the key steps are valid.
+4. If the candidate solution is incorrect, identify the earliest fatal mathematical or logical error.
+5. For incorrect solutions, do not only give the correct solution. You must point to the wrong step, wrong equation, wrong conversion, or wrong inference.
+6. Be concise but precise.
+7. End with exactly one final line in this format:
+
+Verification: Is the answer correct (Yes/No)? X
+
+where X must be either Yes or No.
+
+Question:
+{question}
+
+Candidate Role:
+{candidate_role}
+
+Candidate Solution:
+{candidate_solution}
+
+Reference Correct Solution:
+{reference_solution}
+
+Ground-Truth Final Answer:
+{expected_answer}
